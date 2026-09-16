@@ -177,7 +177,10 @@ footer a{color:var(--gold-light)}
 <div class="wrap">
   <div class="controls">
     <div style="font-size:13.5px;color:var(--ink-soft)" id="hintText">一首曲子填一筆，同一孩子多首就多填幾筆。</div>
-    <button class="btn btn-gold" id="addBtn">＋ 填寫曲目</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-ghost" id="exportBtn">⬇ 匯出 Excel</button>
+      <button class="btn btn-gold" id="addBtn">＋ 填寫曲目</button>
+    </div>
   </div>
   <div class="list" id="list"></div>
 </div>
@@ -279,6 +282,7 @@ footer a{color:var(--gold-light)}
 
 <div id="toast"></div>
 
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <script>
 /* =====================================================================
    Music Showcase — 節目單蒐集 / Repertoire collection
@@ -322,6 +326,7 @@ const T = {
     stCount:'已收曲目',
     hint:'一首曲子填一筆，同一孩子多首就多填幾筆。',
     addBtn:'＋ 填寫曲目', editBtn:'編輯', cancelBtn:'取消', submitBtn:'確認送出', deleteBtn:'刪除這筆',
+    exportBtn:'⬇ 匯出 Excel', exportPw:'請輸入主辦密碼', wrongPw:'密碼錯誤',
     formTitle:'填寫演出曲目', formEditTitle:'編輯曲目', formSub:'一首一筆，可重複提交。',
     lName:'孩子姓名', lPiece:'曲目名稱', lComposer:'作曲家', lInstrument:'樂器', lInstOther:'其他樂器',
     lDur:'曲目長度（約略）', lDurMin:'分鐘', lDurSec:'秒',
@@ -352,6 +357,7 @@ const T = {
     stCount:'Pieces received',
     hint:'One piece per entry. For several pieces by the same child, submit one entry each.',
     addBtn:'＋ Submit a piece', editBtn:'Edit', cancelBtn:'Cancel', submitBtn:'Submit', deleteBtn:'Delete this entry',
+    exportBtn:'⬇ Export Excel', exportPw:'Enter the organiser password', wrongPw:'Wrong password',
     formTitle:'Submit a piece', formEditTitle:'Edit piece', formSub:'One piece per entry — you may submit several.',
     lName:'Child\'s name', lPiece:'Piece title', lComposer:'Composer', lInstrument:'Instrument', lInstOther:'Other instrument',
     lDur:'Duration (approx.)', lDurMin:'minutes', lDurSec:'seconds',
@@ -495,6 +501,7 @@ function applyStatic(){
   set('stCountL', t('stCount'));
   setH('hintText', t('hint'));
   set('addBtn', t('addBtn'));
+  set('exportBtn', t('exportBtn'));
   set('formTitle', t('formTitle'));
   set('formSub', t('formSub'));
   set('cCancel', t('cancelBtn'));
@@ -741,6 +748,59 @@ function deleteEntry(){
     .catch(err => toast(fmt(t('netErr'), { e: err.message })));
 }
 
+/* ---------- export ---------- */
+function instrLabelOf(e){
+  if(e.instrument === 'other' && e.instrument_other) return e.instrument_other;
+  const it = INSTRUMENTS.find(x => x.id === e.instrument);
+  return it ? it.zh : (e.instrument || '');
+}
+function accompLabelOf(e){
+  if(e.has_accomp !== 'yes') return '無';
+  const inst = (e.accomp_inst === 'other' && e.accomp_other) ? e.accomp_other
+    : (ACCOMP_INSTRUMENTS.find(x => x.id === e.accomp_inst) || {}).zh || e.accomp_inst || '';
+  let s = (e.accomp_count || '1') + ' 人 · ' + inst;
+  if(e.accomp_teacher) s += ' · ' + e.accomp_teacher;
+  return s;
+}
+function durText(e){
+  return (e.dur_min || '0') + ' 分 ' + (e.dur_sec || '') + ' 秒';
+}
+
+async function exportExcel(){
+  if(typeof XLSX === 'undefined'){ toast('⚠ 匯出套件未載入，請確認網路連線'); return; }
+  const pw = prompt(t('exportPw'));
+  if(pw === null || pw === '') return;
+
+  let full;
+  if(cloud){
+    try{
+      const j = await apiPost({ action:'export', pw });
+      full = j.entries;
+    }catch(err){
+      toast(err.message === 'wrong password' ? t('wrongPw') : fmt(t('netErr'), { e: err.message }));
+      return;
+    }
+  }else{
+    full = entries;
+  }
+
+  const rows = full.map(e => ({
+    '孩子姓名': e.name,
+    '曲目名稱': e.piece,
+    '作曲家': e.composer,
+    '樂器': instrLabelOf(e),
+    '曲目長度': durText(e),
+    '伴奏': accompLabelOf(e),
+    '聯絡方式': e.contact || '',
+    '備註': e.note || ''
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '曲目');
+  XLSX.writeFile(wb, '節目單曲目.xlsx');
+}
+
 /* ---------- toast ---------- */
 let toastTimer = null;
 function toast(msg){
@@ -757,6 +817,7 @@ document.getElementById('langSwitch').onclick = (e) => {
   if(b) setLang(b.dataset.lang);
 };
 document.getElementById('addBtn').onclick = () => openForm(null);
+document.getElementById('exportBtn').onclick = exportExcel;
 document.getElementById('cCancel').onclick = closeForm;
 document.getElementById('cSubmit').onclick = submitForm;
 document.getElementById('cDelete').onclick = deleteEntry;

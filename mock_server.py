@@ -29,6 +29,8 @@ DB_PATH = os.path.join(ROOT, "repertoire_db.json")
 
 LOCK = threading.Lock()
 
+ADMIN_PW = 'showcase'
+
 HEADERS = ['id', 'name', 'piece', 'composer', 'instrument', 'instrument_other',
            'dur_min', 'dur_sec', 'has_accomp', 'accomp_count', 'accomp_inst',
            'accomp_other', 'accomp_teacher', 'contact', 'note', 'at']
@@ -133,10 +135,18 @@ def act_delete(body):
     return {"ok": True, "entries": PUB()}
 
 
+def act_export(body):
+    """主辦匯出：需密碼，回傳完整資料（含 contact / note）"""
+    if str(body.get("pw")) != ADMIN_PW:
+        return {"ok": False, "error": "wrong password"}
+    return {"ok": True, "entries": list(DB)}
+
+
 ACTIONS = {
     "add": act_add,
     "update": act_update,
     "delete": act_delete,
+    "export": act_export,
 }
 
 

@@ -15,6 +15,7 @@
  */
 
 var SHEET_NAME = 'repertoire';
+var ADMIN_PW = 'showcase';
 
 var HEADERS = [
   'id', 'name', 'piece', 'composer',
@@ -156,6 +157,7 @@ function doPost(e) {
     if (action === 'add')    return json_(handleAdd_(sh, body));
     if (action === 'update') return json_(handleUpdate_(sh, body));
     if (action === 'delete') return json_(handleDelete_(sh, body));
+    if (action === 'export') return json_(handleExport_(sh, body));
 
     return json_({ ok: false, error: 'unknown action: ' + action });
   } catch (err) {
@@ -203,6 +205,12 @@ function handleDelete_(sh, body) {
   if (row === -1) return { ok: false, error: 'entry not found' };
   sh.deleteRow(row);
   return { ok: true, entries: PUB_() };
+}
+
+/** 主辦匯出：需密碼，回傳完整資料（含聯絡方式 / 備註） */
+function handleExport_(sh, body) {
+  if (str_(body.pw) !== ADMIN_PW) return { ok: false, error: 'wrong password' };
+  return { ok: true, entries: readAll_() };
 }
 
 /* --------------------------------------------------------------- utilities */
