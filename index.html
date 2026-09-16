@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music Showcase · 節目單蒐集 Repertoire Collection</title>
+<meta name="description" content="Music Showcase 年度音樂會演出曲目填寫 Repertoire submission for the annual Music Showcase concert.">
+<style>
+:root{
+  --wine:#7a2233;
+  --wine-dark:#5c1626;
+  --gold:#c9a24a;
+  --gold-light:#e6cf94;
+  --ink:#2b2320;
+  --ink-soft:#6b5f58;
+  --paper:#fdfaf5;
+  --paper-2:#f6efe3;
+  --line:#e3d8c8;
+  --ok:#2f7a52;
+  --shadow:0 2px 6px rgba(60,40,20,.06),0 12px 28px rgba(60,40,20,.07);
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Noto Sans TC","Microsoft JhengHei","Helvetica Neue",Arial,sans-serif;
+  background:var(--paper);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;
+}
+a{color:var(--wine)}
+.wrap{max-width:860px;margin:0 auto;padding:0 20px}
+
+/* ---------- header ---------- */
+header{
+  background:linear-gradient(160deg,var(--wine) 0%,var(--wine-dark) 100%);
+  color:#fff;padding:18px 0 22px;position:relative;overflow:hidden;
+}
+header::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 82% 15%,rgba(201,162,74,.28),transparent 55%);pointer-events:none}
+.head-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;position:relative;z-index:1}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{width:44px;height:44px;flex:0 0 44px;border-radius:12px;background:var(--gold);color:var(--wine-dark);display:grid;place-items:center;font-size:24px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+.brand-txt{min-width:0}
+.brand-txt h1{margin:0;font-size:19px;letter-spacing:.5px;font-weight:700;white-space:nowrap}
+.brand-txt p{margin:1px 0 0;font-size:12.5px;opacity:.82}
+.head-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sync{font-size:12px;font-weight:600;border-radius:999px;padding:5px 12px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;white-space:nowrap;display:none;align-items:center;gap:6px}
+.sync.show{display:inline-flex}
+.sync .dot{width:7px;height:7px;border-radius:50%;background:#ccc;flex:0 0 7px}
+.sync.local .dot{background:var(--gold-light)}
+.sync.loading .dot{background:#9fd0ff;animation:pulse 1s infinite}
+.sync.online .dot{background:#5ddc9a}
+.sync.error .dot{background:#ff8f8f}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.lang-switch{display:flex;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:3px;gap:2px}
+.lang-switch button{border:0;background:transparent;color:#fff;opacity:.75;padding:6px 13px;border-radius:999px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;transition:.15s;white-space:nowrap}
+.lang-switch button:hover{opacity:1}
+.lang-switch button.on{background:#fff;color:var(--wine);opacity:1}
+
+/* ---------- hero ---------- */
+.hero{background:var(--paper-2);border-bottom:1px solid var(--line);padding:24px 0}
+.hero-inner{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;flex-wrap:wrap}
+.hero h2{margin:0 0 6px;font-size:22px;color:var(--wine-dark);font-weight:700}
+.hero p{margin:0;color:var(--ink-soft);font-size:14.5px;max-width:600px}
+.stats{display:flex;gap:10px;flex-wrap:wrap}
+.stat{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:12px 20px;min-width:120px;text-align:center;box-shadow:var(--shadow)}
+.stat .n{font-size:26px;font-weight:700;color:var(--wine);line-height:1.2}
+.stat .l{font-size:11.5px;color:var(--ink-soft);letter-spacing:.4px;margin-top:2px}
+
+/* ---------- controls ---------- */
+.controls{padding:20px 0 4px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.btn{border:0;border-radius:999px;padding:12px 22px;font-size:14.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;white-space:nowrap;display:inline-flex;align-items:center;gap:7px}
+.btn-primary{background:var(--wine);color:#fff}
+.btn-primary:hover{background:var(--wine-dark)}
+.btn-gold{background:var(--gold);color:var(--wine-dark)}
+.btn-gold:hover{background:var(--gold-light)}
+.btn-ghost{background:#fff;color:var(--ink-soft);border:1px solid var(--line)}
+.btn-ghost:hover{border-color:var(--wine);color:var(--wine)}
+.btn-sm{padding:8px 15px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.busy{opacity:.55;pointer-events:none}
+
+/* ---------- list ---------- */
+.list{padding:10px 0 40px;display:flex;flex-direction:column;gap:12px}
+.entry{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);display:flex;gap:14px;align-items:flex-start;border-left:4px solid var(--gold)}
+.entry-main{flex:1;min-width:0}
+.entry-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.entry h3{margin:0;font-size:16.5px;color:var(--ink);font-weight:700;line-height:1.4}
+.entry .piece{color:var(--wine);font-weight:700}
+.entry .meta{margin:6px 0 0;font-size:13.5px;color:var(--ink-soft);display:flex;flex-direction:column;gap:3px}
+.entry .meta b{color:var(--ink);font-weight:600}
+.entry .meta .en{opacity:.85;font-size:12.5px}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 11px;background:var(--paper-2);color:var(--wine);white-space:nowrap}
+.tag.accomp{background:#e6f3ec;color:var(--ok)}
+.tag.noaccomp{background:#eee;color:#777}
+.entry-actions{display:flex;flex-direction:column;gap:8px;flex:0 0 auto}
+.empty{text-align:center;padding:60px 20px;color:var(--ink-soft);background:#fff;border:1px dashed var(--line);border-radius:var(--radius)}
+.empty .big{font-size:40px;display:block;margin-bottom:10px}
+
+/* ---------- modal ---------- */
+.overlay{position:fixed;inset:0;background:rgba(43,35,32,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:100;backdrop-filter:blur(2px)}
+.overlay.show{display:flex}
+.modal{background:#fff;border-radius:18px;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:pop .18s ease-out}
+@keyframes pop{from{transform:translateY(12px) scale(.98);opacity:0}to{transform:none;opacity:1}}
+.modal-head{background:linear-gradient(160deg,var(--wine),var(--wine-dark));color:#fff;padding:20px 24px;border-radius:18px 18px 0 0}
+.modal-head h3{margin:0;font-size:18px}
+.modal-head p{margin:5px 0 0;font-size:13px;opacity:.85}
+.modal-body{padding:22px 24px}
+.field{margin-bottom:15px}
+.field label{display:block;font-size:13.5px;font-weight:600;margin-bottom:6px;color:var(--ink)}
+.field label .opt{font-weight:400;color:var(--ink-soft);font-size:12px}
+.field input,.field textarea,.field select{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px 13px;font-size:14.5px;font-family:inherit;color:var(--ink);background:var(--paper);outline:0;transition:.15s}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--wine);background:#fff}
+.field textarea{min-height:70px;resize:vertical}
+.field .err{font-size:12.5px;color:#b04a4a;margin-top:5px;display:none}
+.field.bad input,.field.bad select,.field.bad textarea{border-color:#d88;background:#fdf5f5}
+.field.bad .err{display:block}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.radio-row{display:flex;gap:16px}
+.radio-row label{display:inline-flex;align-items:center;gap:6px;font-weight:500;font-size:14px;cursor:pointer}
+.radio-row input{width:auto}
+.hidden{display:none!important}
+.modal-foot{display:flex;gap:10px;padding:0 24px 24px}
+.modal-foot .btn{flex:1;justify-content:center}
+.note{background:var(--paper-2);border-left:3px solid var(--gold);border-radius:8px;padding:11px 14px;font-size:12.8px;color:var(--ink-soft);margin-top:16px}
+
+/* ---------- toast ---------- */
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,80px);background:var(--ink);color:#fff;padding:13px 24px;border-radius:999px;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.25);z-index:200;opacity:0;transition:.25s;pointer-events:none;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+footer{background:var(--wine-dark);color:rgba(255,255,255,.82);padding:28px 0;text-align:center;font-size:13px;margin-top:20px}
+footer .motto{font-size:15px;color:var(--gold-light);font-style:italic;margin-bottom:8px}
+footer a{color:var(--gold-light)}
+
+@media(max-width:640px){
+  .brand-txt h1{font-size:16.5px;white-space:normal}
+  .hero h2{font-size:19px}
+  .row2{grid-template-columns:1fr}
+  .modal-foot{flex-direction:column}
+  .stat{flex:1 1 88px;padding:10px 12px;min-width:0}
+  .stat .n{font-size:20px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap head-row">
+    <div class="brand">
+      <div class="logo">🎻</div>
+      <div class="brand-txt">
+        <h1>Music Showcase</h1>
+        <p id="tagline">音樂展演社群 · 節目單蒐集</p>
+      </div>
+    </div>
+    <div class="head-tools">
+      <div class="sync" id="syncBadge"><span class="dot"></span><span id="syncText"></span></div>
+      <div class="lang-switch" id="langSwitch">
+        <button data-lang="zh" class="on">中文</button>
+        <button data-lang="en">English</button>
+        <button data-lang="both">雙語</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div>
+      <h2 id="heroTitle">演出曲目填寫</h2>
+      <p id="heroText">請填寫孩子的演出曲目，方便我們安排節目。一首曲子填一筆，可以重複提交。</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="n" id="stCount">0</div><div class="l" id="stCountL">已收曲目</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="controls">
+    <div style="font-size:13.5px;color:var(--ink-soft)" id="hintText">一首曲子填一筆，同一孩子多首就多填幾筆。</div>
+    <button class="btn btn-gold" id="addBtn">＋ 填寫曲目</button>
+  </div>
+  <div class="list" id="list"></div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="motto" id="motto">「音樂讓我們聚在一起，見證成長，也珍惜友情。」</div>
+    <div id="footNote">Music Showcase 社群 · 年度音樂會節目單蒐集</div>
+  </div>
+</footer>
+
+<!-- form modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="formTitle">填寫演出曲目</h3>
+      <p id="formSub">一首一筆，可重複提交。</p>
+    </div>
+    <div class="modal-body">
+      <div class="field" id="fName">
+        <label id="lName">孩子姓名 <span class="opt">(必填)</span></label>
+        <input id="cName" placeholder="例：王小明 / Kevin">
+        <div class="err" id="eName">請填寫孩子姓名</div>
+      </div>
+      <div class="field" id="fPiece">
+        <label id="lPiece">曲目名稱 <span class="opt">(必填)</span></label>
+        <input id="cPiece" placeholder="例：小星星變奏曲">
+        <div class="err" id="ePiece">請填寫曲目名稱</div>
+      </div>
+      <div class="field" id="fComposer">
+        <label id="lComposer">作曲家 <span class="opt">(必填)</span></label>
+        <input id="cComposer" placeholder="例：莫札特">
+        <div class="err" id="eComposer">請填寫作曲家</div>
+      </div>
+      <div class="field">
+        <label id="lInstrument">樂器</label>
+        <select id="cInstrument"></select>
+        <div class="field hidden" id="fInstOther" style="margin-top:10px">
+          <label id="lInstOther">其他樂器</label>
+          <input id="cInstOther" placeholder="例：法國號">
+        </div>
+      </div>
+      <div class="field">
+        <label id="lDur">曲目長度（約略）</label>
+        <div class="row2">
+          <div>
+            <select id="cDurMin"></select>
+            <div style="font-size:12px;color:var(--ink-soft);margin-top:3px" id="lDurMin">分鐘</div>
+          </div>
+          <div>
+            <select id="cDurSec"></select>
+            <div style="font-size:12px;color:var(--ink-soft);margin-top:3px" id="lDurSec">秒</div>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label id="lHasAccomp">是否有伴奏</label>
+        <div class="radio-row">
+          <label><input type="radio" name="accomp" value="no" checked> <span id="lNo">沒有</span></label>
+          <label><input type="radio" name="accomp" value="yes"> <span id="lYes">有伴奏</span></label>
+        </div>
+      </div>
+      <div id="accompBlock" class="hidden">
+        <div class="field">
+          <label id="lAccompCount">伴奏幾人</label>
+          <select id="cAccompCount"></select>
+        </div>
+        <div class="field">
+          <label id="lAccompInst">伴奏樂器</label>
+          <select id="cAccompInst"></select>
+          <div class="field hidden" id="fAccompOther" style="margin-top:10px">
+            <label id="lAccompOther">其他伴奏樂器</label>
+            <input id="cAccompOther" placeholder="例：法國號">
+          </div>
+        </div>
+        <div class="field">
+          <label id="lAccompTeacher">伴奏老師名字 <span class="opt">(選填)</span></label>
+          <input id="cAccompTeacher" placeholder="例：林老師">
+        </div>
+      </div>
+      <div class="field">
+        <label id="lContact">家長聯絡方式 <span class="opt">(選填，方便主辦聯繫確認)</span></label>
+        <input id="cContact" placeholder="例：Line: kevin 或 0912-345-678">
+      </div>
+      <div class="field">
+        <label id="lNote">備註 <span class="opt">(選填)</span></label>
+        <textarea id="cNote" placeholder="例：需要譜架 / 需要鋼琴伴奏"></textarea>
+      </div>
+      <div class="note" id="privacyNote">🔒 聯絡方式只會保存在主辦端，不會公開顯示在網站上。</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="cCancel">取消</button>
+      <button class="btn btn-ghost hidden" id="cDelete" style="color:#b04a4a">刪除這筆</button>
+      <button class="btn btn-primary" id="cSubmit">確認送出</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* =====================================================================
+   Music Showcase — 節目單蒐集 / Repertoire collection
+   開放式表單，一首一筆，可重複提交，可編輯。
+   ===================================================================== */
+
+const LS_KEY = 'ms_repertoire_v1';
+const LS_LANG = 'ms_repertoire_lang';
+
+const CONFIG = {
+  API_URL: '',          // 例：https://script.google.com/macros/s/AKfy.../exec
+  POLL_MS: 30000
+};
+
+const INSTRUMENTS = [
+  { id:'piano',   zh:'鋼琴',       en:'Piano' },
+  { id:'violin',  zh:'小提琴',     en:'Violin' },
+  { id:'cello',   zh:'大提琴',     en:'Cello' },
+  { id:'flute',   zh:'長笛',       en:'Flute' },
+  { id:'guitar',  zh:'吉他',       en:'Guitar' },
+  { id:'ukulele', zh:'烏克麗麗',   en:'Ukulele' },
+  { id:'voice',   zh:'唱歌(不需要樂器)', en:'Voice (no instrument)' },
+  { id:'other',   zh:'其他',       en:'Other' }
+];
+
+const ACCOMP_INSTRUMENTS = [
+  { id:'piano',   zh:'鋼琴',     en:'Piano' },
+  { id:'violin',  zh:'小提琴',   en:'Violin' },
+  { id:'cello',   zh:'大提琴',   en:'Cello' },
+  { id:'flute',   zh:'長笛',     en:'Flute' },
+  { id:'guitar',  zh:'吉他',     en:'Guitar' },
+  { id:'ukulele', zh:'烏克麗麗', en:'Ukulele' },
+  { id:'other',   zh:'其他',     en:'Other' }
+];
+
+const T = {
+  zh:{
+    tagline:'音樂展演社群 · 節目單蒐集',
+    heroTitle:'演出曲目填寫',
+    heroText:'請填寫孩子的演出曲目，方便我們安排節目。一首曲子填一筆，可以重複提交。',
+    stCount:'已收曲目',
+    hint:'一首曲子填一筆，同一孩子多首就多填幾筆。',
+    addBtn:'＋ 填寫曲目', editBtn:'編輯', cancelBtn:'取消', submitBtn:'確認送出', deleteBtn:'刪除這筆',
+    formTitle:'填寫演出曲目', formEditTitle:'編輯曲目', formSub:'一首一筆，可重複提交。',
+    lName:'孩子姓名', lPiece:'曲目名稱', lComposer:'作曲家', lInstrument:'樂器', lInstOther:'其他樂器',
+    lDur:'曲目長度（約略）', lDurMin:'分鐘', lDurSec:'秒',
+    lHasAccomp:'是否有伴奏', lYes:'有伴奏', lNo:'沒有',
+    lAccompCount:'伴奏幾人', lAccompInst:'伴奏樂器', lAccompOther:'其他伴奏樂器', lAccompTeacher:'伴奏老師名字',
+    lContact:'家長聯絡方式', lNote:'備註',
+    req:'(必填)', opt:'(選填)',
+    eName:'請填寫孩子姓名', ePiece:'請填寫曲目名稱', eComposer:'請填寫作曲家',
+    privacy:'🔒 聯絡方式只會保存在主辦端，不會公開顯示在網站上。',
+    accompLabel:'有伴奏', noAccompLabel:'沒有伴奏',
+    accompDetail:'伴奏 {n} 人 · {i}', teacherLabel:'伴奏老師',
+    minUnit:'分', secUnit:'秒',
+    empty:'還沒有收到曲目', emptySub:'點上方「＋ 填寫曲目」開始填寫吧！',
+    added:'已送出曲目，謝謝！🎵', updated:'已更新曲目', deleted:'已刪除這筆曲目',
+    netErr:'⚠ 連線失敗：{e}',
+    confirmDelete:'確定要刪除這筆曲目嗎？',
+    syncLocal:'本機模式', syncLoading:'連線中…', syncOnline:'雲端已連線', syncError:'連線失敗',
+    motto:'「音樂讓我們聚在一起，見證成長，也珍惜友情。」',
+    footNote:'Music Showcase 社群 · 年度音樂會節目單蒐集',
+    minLabel:'{n} 分鐘', secLabel:'{n} 秒', durLabel:'{m} 分 {s} 秒'
+  },
+  en:{
+    tagline:'A music community · repertoire collection',
+    heroTitle:'Submit a performance piece',
+    heroText:'Please submit your child\'s piece so we can arrange the programme. One piece per entry — you may submit several.',
+    stCount:'Pieces received',
+    hint:'One piece per entry. For several pieces by the same child, submit one entry each.',
+    addBtn:'＋ Submit a piece', editBtn:'Edit', cancelBtn:'Cancel', submitBtn:'Submit', deleteBtn:'Delete this entry',
+    formTitle:'Submit a piece', formEditTitle:'Edit piece', formSub:'One piece per entry — you may submit several.',
+    lName:'Child\'s name', lPiece:'Piece title', lComposer:'Composer', lInstrument:'Instrument', lInstOther:'Other instrument',
+    lDur:'Duration (approx.)', lDurMin:'minutes', lDurSec:'seconds',
+    lHasAccomp:'Accompaniment?', lYes:'Yes', lNo:'No',
+    lAccompCount:'Number of accompanists', lAccompInst:'Accompaniment instrument', lAccompOther:'Other accompaniment instrument', lAccompTeacher:'Accompanist / teacher name',
+    lContact:'Parent contact', lNote:'Notes',
+    req:'(required)', opt:'(optional)',
+    eName:'Please enter the child\'s name', ePiece:'Please enter the piece title', eComposer:'Please enter the composer',
+    privacy:'🔒 Your contact details are only stored with the organiser — never shown publicly.',
+    accompLabel:'With accompaniment', noAccompLabel:'No accompaniment',
+    accompDetail:'{n} accompanist(s) · {i}', teacherLabel:'Accompanist',
+    minUnit:'min', secUnit:'sec',
+    empty:'No pieces yet', emptySub:'Tap “＋ Submit a piece” above to begin.',
+    added:'Piece submitted — thank you! 🎵', updated:'Piece updated', deleted:'Entry deleted',
+    netErr:'⚠ Connection failed: {e}',
+    confirmDelete:'Delete this entry?',
+    syncLocal:'Local mode', syncLoading:'Connecting…', syncOnline:'Cloud synced', syncError:'Connection failed',
+    motto:'“Music brings us together — to grow, and to cherish friendship.”',
+    footNote:'Music Showcase community · Annual concert repertoire collection',
+    minLabel:'{n} min', secLabel:'{n} sec', durLabel:'{m} min {s} sec'
+  }
+};
+
+/* ---------------- state ---------------- */
+let lang = localStorage.getItem(LS_LANG) || 'zh';
+let entries = load();
+let pendingId = null;   // null = 新增, 否則 = 編輯該筆 id
+
+function load(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){ const d = JSON.parse(raw); if(Array.isArray(d)) return d; }
+  }catch(e){}
+  return [];
+}
+function save(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(entries)); }catch(e){}
+}
+
+/* ===================== 雲端同步層 / cloud layer ===================== */
+let cloud = false;
+
+function setSyncBadge(state){
+  const el = document.getElementById('syncBadge');
+  const tx = document.getElementById('syncText');
+  if(!el || !tx) return;
+  el.dataset.state = state;
+  el.className = 'sync show ' + state;
+  const map = { local:'syncLocal', loading:'syncLoading', online:'syncOnline', error:'syncError' };
+  tx.textContent = t(map[state] || 'syncLocal');
+}
+
+async function apiList(){
+  const sep = (CONFIG.API_URL.indexOf('?') === -1) ? '?' : '&';
+  const r = await fetch(CONFIG.API_URL + sep + 'action=list&t=' + Date.now(), { method:'GET', redirect:'follow' });
+  if(!r.ok) throw new Error('HTTP ' + r.status);
+  const j = await r.json();
+  if(!j.ok) throw new Error(j.error || 'api error');
+  return j.entries || [];
+}
+
+async function apiPost(payload){
+  const r = await fetch(CONFIG.API_URL, {
+    method:'POST',
+    headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload),
+    redirect:'follow'
+  });
+  if(!r.ok) throw new Error('HTTP ' + r.status);
+  const j = await r.json();
+  if(!j.ok) throw new Error(j.error || 'api error');
+  return j;
+}
+
+async function refresh(silent){
+  if(!cloud) return false;
+  try{
+    entries = await apiList();
+    save(); render();
+    setSyncBadge('online');
+    return true;
+  }catch(e){
+    setSyncBadge('error');
+    if(!silent) toast(fmt(t('netErr'), { e: e.message }));
+    return false;
+  }
+}
+
+async function initSync(){
+  if(!CONFIG.API_URL){ cloud = false; setSyncBadge('local'); return; }
+  cloud = true;
+  setSyncBadge('loading');
+  const ok = await refresh(true);
+  if(ok){
+    setInterval(function(){ refresh(true); }, CONFIG.POLL_MS);
+    window.addEventListener('focus', function(){ refresh(true); });
+    document.addEventListener('visibilitychange', function(){ if(!document.hidden) refresh(true); });
+  }
+}
+
+/* ---------------- i18n helpers ---------------- */
+function t(k){
+  const zh = T.zh[k], en = T.en[k];
+  if(zh === undefined && en === undefined) return k;
+  if(lang === 'both'){ if(zh && en && zh !== en) return zh + ' · ' + en; return zh || en || k; }
+  return (lang === 'en' ? (en || zh) : (zh || en)) || k;
+}
+function fmt(str, vars){
+  return String(str).replace(/\{(\w+)\}/g, (m,k) => (vars && vars[k] !== undefined) ? vars[k] : m);
+}
+function esc(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function instrName(id, list){
+  const it = (list || INSTRUMENTS).find(x => x.id === id);
+  if(!it) return id;
+  return (lang === 'en') ? it.en : (lang === 'both' ? it.zh + ' · ' + it.en : it.zh);
+}
+
+/* ---------------- language ---------------- */
+function setLang(l){
+  lang = l;
+  localStorage.setItem(LS_LANG, l);
+  document.documentElement.lang = (l === 'en') ? 'en' : 'zh-Hant';
+  [...document.querySelectorAll('#langSwitch button')].forEach(b => b.classList.toggle('on', b.dataset.lang === l));
+  applyStatic(); fillSelects(); render();
+  const sb = document.getElementById('syncBadge');
+  if(sb && sb.dataset.state) setSyncBadge(sb.dataset.state);
+}
+
+function applyStatic(){
+  const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  const setH = (id, v) => { const el = document.getElementById(id); if(el) el.innerHTML = v; };
+  set('tagline', t('tagline'));
+  set('heroTitle', t('heroTitle'));
+  setH('heroText', t('heroText'));
+  set('stCountL', t('stCount'));
+  setH('hintText', t('hint'));
+  set('addBtn', t('addBtn'));
+  set('formTitle', t('formTitle'));
+  set('formSub', t('formSub'));
+  set('cCancel', t('cancelBtn'));
+  set('cSubmit', t('submitBtn'));
+  set('cDelete', t('deleteBtn'));
+  setH('privacyNote', t('privacy'));
+  set('lDurMin', t('lDurMin'));
+  set('lDurSec', t('lDurSec'));
+  set('lNo', t('lNo'));
+  set('lYes', t('lYes'));
+  setH('motto', t('motto'));
+  setH('footNote', t('footNote'));
+  document.getElementById('lName').innerHTML = esc(t('lName')) + ' <span class="opt">' + esc(t('req')) + '</span>';
+  document.getElementById('lPiece').innerHTML = esc(t('lPiece')) + ' <span class="opt">' + esc(t('req')) + '</span>';
+  document.getElementById('lComposer').innerHTML = esc(t('lComposer')) + ' <span class="opt">' + esc(t('req')) + '</span>';
+  document.getElementById('lInstrument').innerHTML = esc(t('lInstrument'));
+  document.getElementById('lInstOther').innerHTML = esc(t('lInstOther'));
+  document.getElementById('lDur').innerHTML = esc(t('lDur'));
+  document.getElementById('lHasAccomp').innerHTML = esc(t('lHasAccomp'));
+  document.getElementById('lAccompCount').innerHTML = esc(t('lAccompCount'));
+  document.getElementById('lAccompInst').innerHTML = esc(t('lAccompInst'));
+  document.getElementById('lAccompOther').innerHTML = esc(t('lAccompOther'));
+  document.getElementById('lAccompTeacher').innerHTML = esc(t('lAccompTeacher')) + ' <span class="opt">' + esc(t('opt')) + '</span>';
+  document.getElementById('lContact').innerHTML = esc(t('lContact')) + ' <span class="opt">' + esc(t('opt')) + '</span>';
+  document.getElementById('lNote').innerHTML = esc(t('lNote')) + ' <span class="opt">' + esc(t('opt')) + '</span>';
+  set('eName', t('eName'));
+  set('ePiece', t('ePiece'));
+  set('eComposer', t('eComposer'));
+}
+
+function fillSelects(){
+  // 樂器
+  const selInst = document.getElementById('cInstrument');
+  selInst.innerHTML = INSTRUMENTS.map(x =>
+    `<option value="${x.id}">${esc(instrName(x.id, INSTRUMENTS))}</option>`).join('');
+  // 伴奏樂器
+  const selAcc = document.getElementById('cAccompInst');
+  selAcc.innerHTML = ACCOMP_INSTRUMENTS.map(x =>
+    `<option value="${x.id}">${esc(instrName(x.id, ACCOMP_INSTRUMENTS))}</option>`).join('');
+  // 分鐘 0-10
+  document.getElementById('cDurMin').innerHTML = Array.from({length:11}, (_,i) =>
+    `<option value="${i}">${i}</option>`).join('');
+  // 秒 0/15/30/45
+  document.getElementById('cDurSec').innerHTML = [0,15,30,45].map(s =>
+    `<option value="${s}">${s}</option>`).join('');
+  // 伴奏幾人 1-6
+  document.getElementById('cAccompCount').innerHTML = Array.from({length:6}, (_,i) =>
+    `<option value="${i+1}">${i+1}</option>`).join('');
+}
+
+/* ---------------- render ---------------- */
+function render(){
+  const box = document.getElementById('list');
+  document.getElementById('stCount').textContent = entries.length;
+
+  if(!entries.length){
+    box.innerHTML = `<div class="empty"><span class="big">🎼</span>
+      <div style="font-size:16px;font-weight:600;color:var(--ink)">${esc(t('empty'))}</div>
+      <div>${esc(t('emptySub'))}</div></div>`;
+    return;
+  }
+
+  box.innerHTML = entries.map(e => {
+    const dur = (e.dur_min || e.dur_sec) ? fmt(t('durLabel'), { m: e.dur_min || '0', s: e.dur_sec || '0' }) : '';
+    const accompTag = (e.has_accomp === 'yes')
+      ? `<span class="tag accomp">${esc(t('accompLabel'))}</span>`
+      : `<span class="tag noaccomp">${esc(t('noAccompLabel'))}</span>`;
+
+    let accompLine = '';
+    if(e.has_accomp === 'yes'){
+      const inst = (e.accomp_inst === 'other' && e.accomp_other) ? e.accomp_other : instrName(e.accomp_inst, ACCOMP_INSTRUMENTS);
+      accompLine = `<div>🎹 ${esc(fmt(t('accompDetail'), { n: e.accomp_count || '1', i: inst }))}` +
+        (e.accomp_teacher ? ` · ${esc(t('teacherLabel'))} ${esc(e.accomp_teacher)}` : '') + `</div>`;
+    }
+
+    const instLabel = (e.instrument === 'other' && e.instrument_other) ? e.instrument_other : instrName(e.instrument, INSTRUMENTS);
+
+    return `<div class="entry">
+      <div class="entry-main">
+        <div class="entry-top">
+          <h3><span class="piece">${esc(e.piece)}</span> — ${esc(e.name)}</h3>
+          ${accompTag}
+        </div>
+        <div class="meta">
+          <div>🎼 ${esc(t('lComposer'))}：<b>${esc(e.composer)}</b></div>
+          <div>🎻 ${esc(t('lInstrument'))}：<b>${esc(instLabel)}</b>${dur ? ' · ⏱ ' + esc(dur) : ''}</div>
+          ${accompLine}
+        </div>
+      </div>
+      <div class="entry-actions">
+        <button class="btn btn-ghost btn-sm" data-edit="${esc(e.id)}">✏️ ${esc(t('editBtn'))}</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  box.querySelectorAll('[data-edit]').forEach(b => {
+    b.onclick = () => openForm(b.dataset.edit);
+  });
+}
+
+/* ---------------- form ---------------- */
+function openForm(id){
+  pendingId = id || null;
+  const e = id ? entries.find(x => x.id === id) : null;
+
+  document.getElementById('formTitle').textContent = id ? t('formEditTitle') : t('formTitle');
+  document.getElementById('cDelete').classList.toggle('hidden', !id);
+
+  // 清空
+  ['cName','cPiece','cComposer','cInstOther','cAccompOther','cAccompTeacher','cContact','cNote'].forEach(i => document.getElementById(i).value = '');
+  document.getElementById('cInstrument').value = 'piano';
+  document.getElementById('cDurMin').value = '3';
+  document.getElementById('cDurSec').value = '0';
+  document.getElementById('cAccompCount').value = '1';
+  document.getElementById('cAccompInst').value = 'piano';
+  setAccomp('no');
+  ['fName','fPiece','fComposer'].forEach(i => document.getElementById(i).classList.remove('bad'));
+
+  if(e){
+    document.getElementById('cName').value = e.name || '';
+    document.getElementById('cPiece').value = e.piece || '';
+    document.getElementById('cComposer').value = e.composer || '';
+    document.getElementById('cInstrument').value = e.instrument || 'piano';
+    document.getElementById('cInstOther').value = e.instrument_other || '';
+    document.getElementById('cDurMin').value = e.dur_min || '0';
+    document.getElementById('cDurSec').value = e.dur_sec || '0';
+    if(e.has_accomp === 'yes'){
+      setAccomp('yes');
+      document.getElementById('cAccompCount').value = e.accomp_count || '1';
+      document.getElementById('cAccompInst').value = e.accomp_inst || 'piano';
+      document.getElementById('cAccompOther').value = e.accomp_other || '';
+      document.getElementById('cAccompTeacher').value = e.accomp_teacher || '';
+    }
+    // contact/note 公開版不提供，留空（後端保留舊值）
+  }
+  toggleInstOther();
+  toggleAccompOther();
+
+  document.getElementById('overlay').classList.add('show');
+  setTimeout(() => document.getElementById('cName').focus(), 60);
+}
+
+function setAccomp(v){
+  document.querySelectorAll('input[name="accomp"]').forEach(r => r.checked = (r.value === v));
+  document.getElementById('accompBlock').classList.toggle('hidden', v !== 'yes');
+}
+
+function toggleInstOther(){
+  document.getElementById('fInstOther').classList.toggle('hidden', document.getElementById('cInstrument').value !== 'other');
+}
+function toggleAccompOther(){
+  document.getElementById('fAccompOther').classList.toggle('hidden', document.getElementById('cAccompInst').value !== 'other');
+}
+
+function closeForm(){
+  document.getElementById('overlay').classList.remove('show');
+  pendingId = null;
+}
+
+function collectForm(){
+  const hasAccomp = document.querySelector('input[name="accomp"]:checked').value;
+  const e = {
+    name: document.getElementById('cName').value.trim(),
+    piece: document.getElementById('cPiece').value.trim(),
+    composer: document.getElementById('cComposer').value.trim(),
+    instrument: document.getElementById('cInstrument').value,
+    instrument_other: document.getElementById('cInstOther').value.trim(),
+    dur_min: document.getElementById('cDurMin').value,
+    dur_sec: document.getElementById('cDurSec').value,
+    has_accomp: hasAccomp,
+    accomp_count: hasAccomp === 'yes' ? document.getElementById('cAccompCount').value : '',
+    accomp_inst: hasAccomp === 'yes' ? document.getElementById('cAccompInst').value : '',
+    accomp_other: hasAccomp === 'yes' ? document.getElementById('cAccompOther').value.trim() : '',
+    accomp_teacher: hasAccomp === 'yes' ? document.getElementById('cAccompTeacher').value.trim() : '',
+    contact: document.getElementById('cContact').value.trim(),
+    note: document.getElementById('cNote').value.trim()
+  };
+  return e;
+}
+
+function submitForm(){
+  const e = collectForm();
+  const bad = {
+    name: !e.name,
+    piece: !e.piece,
+    composer: !e.composer
+  };
+  document.getElementById('fName').classList.toggle('bad', bad.name);
+  document.getElementById('fPiece').classList.toggle('bad', bad.piece);
+  document.getElementById('fComposer').classList.toggle('bad', bad.composer);
+  if(bad.name || bad.piece || bad.composer) return;
+
+  const btn = document.getElementById('cSubmit');
+  btn.classList.add('busy');
+
+  const action = pendingId ? 'update' : 'add';
+  const payload = pendingId ? { action, id: pendingId, entry: e } : { action, entry: e };
+
+  if(!cloud){
+    // 本機模式
+    if(pendingId){
+      const idx = entries.findIndex(x => x.id === pendingId);
+      if(idx >= 0){ e.id = entries[idx].id; e.at = entries[idx].at; entries[idx] = e; }
+    }else{
+      e.id = 'r' + Date.now().toString(36);
+      e.at = new Date().toISOString();
+      entries.push(e);
+    }
+    save(); render();
+    toast(pendingId ? t('updated') : t('added'));
+    closeForm();
+    btn.classList.remove('busy');
+    return;
+  }
+
+  apiPost(payload)
+    .then(j => {
+      if(j.entries){ entries = j.entries; save(); }
+      render();
+      toast(pendingId ? t('updated') : t('added'));
+      closeForm();
+    })
+    .catch(err => toast(fmt(t('netErr'), { e: err.message })))
+    .finally(() => btn.classList.remove('busy'));
+}
+
+function deleteEntry(){
+  if(!pendingId) return;
+  if(!confirm(t('confirmDelete'))) return;
+  if(!cloud){
+    entries = entries.filter(x => x.id !== pendingId);
+    save(); render(); toast(t('deleted')); closeForm();
+    return;
+  }
+  apiPost({ action:'delete', id: pendingId })
+    .then(j => {
+      if(j.entries){ entries = j.entries; save(); }
+      render(); toast(t('deleted')); closeForm();
+    })
+    .catch(err => toast(fmt(t('netErr'), { e: err.message })));
+}
+
+/* ---------- toast ---------- */
+let toastTimer = null;
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+/* ---------- wiring ---------- */
+document.getElementById('langSwitch').onclick = (e) => {
+  const b = e.target.closest('button');
+  if(b) setLang(b.dataset.lang);
+};
+document.getElementById('addBtn').onclick = () => openForm(null);
+document.getElementById('cCancel').onclick = closeForm;
+document.getElementById('cSubmit').onclick = submitForm;
+document.getElementById('cDelete').onclick = deleteEntry;
+document.getElementById('overlay').onclick = (e) => { if(e.target.id === 'overlay') closeForm(); };
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeForm(); });
+document.getElementById('cInstrument').onchange = toggleInstOther;
+document.getElementById('cAccompInst').onchange = toggleAccompOther;
+document.querySelectorAll('input[name="accomp"]').forEach(r => r.onchange = () => setAccomp(r.value));
+
+fillSelects();
+setLang(lang);
+initSync();
+</script>
+</body>
+</html>
