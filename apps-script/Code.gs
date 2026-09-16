@@ -171,6 +171,7 @@ function handleAdd_(sh, body) {
   var e = body.entry || {};
   if (!str_(e.name).trim()) return { ok: false, error: 'missing name' };
   if (!str_(e.piece).trim()) return { ok: false, error: 'missing piece' };
+  if (str_(e.has_accomp) === 'yes' && !str_(e.accomp_teacher).trim()) return { ok: false, error: 'missing accomp teacher' };
   if (!e.id) e.id = 'r' + new Date().getTime().toString(36);
   e.at = new Date().toISOString();
   sh.appendRow(entryToRow_(e));
@@ -185,6 +186,7 @@ function handleUpdate_(sh, body) {
   var e = body.entry || {};
   if (!str_(e.name).trim()) return { ok: false, error: 'missing name' };
   if (!str_(e.piece).trim()) return { ok: false, error: 'missing piece' };
+  if (str_(e.has_accomp) === 'yes' && !str_(e.accomp_teacher).trim()) return { ok: false, error: 'missing accomp teacher' };
 
   // 保留 id / 時間 / 聯絡方式 / 備註（編輯畫面看不到、也拿不到舊值）
   e.id = old.id;

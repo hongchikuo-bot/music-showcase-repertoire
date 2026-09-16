@@ -253,9 +253,10 @@ footer a{color:var(--gold-light)}
             <input id="cAccompOther" placeholder="例：法國號">
           </div>
         </div>
-        <div class="field">
+        <div class="field" id="fAccompTeacher">
           <label id="lAccompTeacher">伴奏老師名字 <span class="opt">(選填)</span></label>
           <input id="cAccompTeacher" placeholder="例：林老師">
+          <div class="err" id="eAccompTeacher">有伴奏時請填寫伴奏老師名字</div>
         </div>
       </div>
       <div class="field">
@@ -326,9 +327,11 @@ const T = {
     lDur:'曲目長度（約略）', lDurMin:'分鐘', lDurSec:'秒',
     lHasAccomp:'是否有伴奏', lYes:'有伴奏', lNo:'沒有',
     lAccompCount:'伴奏幾人', lAccompInst:'伴奏樂器', lAccompOther:'其他伴奏樂器', lAccompTeacher:'伴奏老師名字',
+    accompReq:'(有伴奏時必填)',
     lContact:'家長聯絡方式', lNote:'備註',
     req:'(必填)', opt:'(選填)',
     eName:'請填寫孩子姓名', ePiece:'請填寫曲目名稱', eComposer:'請填寫作曲家',
+    eAccompTeacher:'有伴奏時請填寫伴奏老師名字',
     privacy:'🔒 聯絡方式只會保存在主辦端，不會公開顯示在網站上。',
     accompLabel:'有伴奏', noAccompLabel:'沒有伴奏',
     accompDetail:'伴奏 {n} 人 · {i}', teacherLabel:'伴奏老師',
@@ -354,9 +357,11 @@ const T = {
     lDur:'Duration (approx.)', lDurMin:'minutes', lDurSec:'seconds',
     lHasAccomp:'Accompaniment?', lYes:'Yes', lNo:'No',
     lAccompCount:'Number of accompanists', lAccompInst:'Accompaniment instrument', lAccompOther:'Other accompaniment instrument', lAccompTeacher:'Accompanist / teacher name',
+    accompReq:'(required if accompanied)',
     lContact:'Parent contact', lNote:'Notes',
     req:'(required)', opt:'(optional)',
     eName:'Please enter the child\'s name', ePiece:'Please enter the piece title', eComposer:'Please enter the composer',
+    eAccompTeacher:'Please enter the accompanist / teacher name',
     privacy:'🔒 Your contact details are only stored with the organiser — never shown publicly.',
     accompLabel:'With accompaniment', noAccompLabel:'No accompaniment',
     accompDetail:'{n} accompanist(s) · {i}', teacherLabel:'Accompanist',
@@ -512,12 +517,13 @@ function applyStatic(){
   document.getElementById('lAccompCount').innerHTML = esc(t('lAccompCount'));
   document.getElementById('lAccompInst').innerHTML = esc(t('lAccompInst'));
   document.getElementById('lAccompOther').innerHTML = esc(t('lAccompOther'));
-  document.getElementById('lAccompTeacher').innerHTML = esc(t('lAccompTeacher')) + ' <span class="opt">' + esc(t('opt')) + '</span>';
+  document.getElementById('lAccompTeacher').innerHTML = esc(t('lAccompTeacher')) + ' <span class="opt">' + esc(t('accompReq')) + '</span>';
   document.getElementById('lContact').innerHTML = esc(t('lContact')) + ' <span class="opt">' + esc(t('opt')) + '</span>';
   document.getElementById('lNote').innerHTML = esc(t('lNote')) + ' <span class="opt">' + esc(t('opt')) + '</span>';
   set('eName', t('eName'));
   set('ePiece', t('ePiece'));
   set('eComposer', t('eComposer'));
+  set('eAccompTeacher', t('eAccompTeacher'));
 }
 
 function fillSelects(){
@@ -532,8 +538,9 @@ function fillSelects(){
   // 分鐘 0-10
   document.getElementById('cDurMin').innerHTML = Array.from({length:11}, (_,i) =>
     `<option value="${i}">${i}</option>`).join('');
-  // 秒 0/15/30/45
-  document.getElementById('cDurSec').innerHTML = [0,15,30,45].map(s =>
+  // 秒區間 5~10 ... 50~59
+  const secOpts = ['5~10','10~15','15~20','20~25','25~30','30~35','35~40','40~45','45~50','50~59'];
+  document.getElementById('cDurSec').innerHTML = secOpts.map(s =>
     `<option value="${s}">${s}</option>`).join('');
   // 伴奏幾人 1-6
   document.getElementById('cAccompCount').innerHTML = Array.from({length:6}, (_,i) =>
@@ -602,11 +609,11 @@ function openForm(id){
   ['cName','cPiece','cComposer','cInstOther','cAccompOther','cAccompTeacher','cContact','cNote'].forEach(i => document.getElementById(i).value = '');
   document.getElementById('cInstrument').value = 'piano';
   document.getElementById('cDurMin').value = '3';
-  document.getElementById('cDurSec').value = '0';
+  document.getElementById('cDurSec').value = '5~10';
   document.getElementById('cAccompCount').value = '1';
   document.getElementById('cAccompInst').value = 'piano';
   setAccomp('no');
-  ['fName','fPiece','fComposer'].forEach(i => document.getElementById(i).classList.remove('bad'));
+  ['fName','fPiece','fComposer','fAccompTeacher'].forEach(i => document.getElementById(i).classList.remove('bad'));
 
   if(e){
     document.getElementById('cName').value = e.name || '';
@@ -675,12 +682,14 @@ function submitForm(){
   const bad = {
     name: !e.name,
     piece: !e.piece,
-    composer: !e.composer
+    composer: !e.composer,
+    accompTeacher: (e.has_accomp === 'yes' && !e.accomp_teacher)
   };
   document.getElementById('fName').classList.toggle('bad', bad.name);
   document.getElementById('fPiece').classList.toggle('bad', bad.piece);
   document.getElementById('fComposer').classList.toggle('bad', bad.composer);
-  if(bad.name || bad.piece || bad.composer) return;
+  document.getElementById('fAccompTeacher').classList.toggle('bad', bad.accompTeacher);
+  if(bad.name || bad.piece || bad.composer || bad.accompTeacher) return;
 
   const btn = document.getElementById('cSubmit');
   btn.classList.add('busy');

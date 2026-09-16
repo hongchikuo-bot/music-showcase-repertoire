@@ -80,6 +80,8 @@ def act_add(body):
         return {"ok": False, "error": "missing name"}
     if not piece:
         return {"ok": False, "error": "missing piece"}
+    if str(e.get("has_accomp")) == "yes" and not str(e.get("accomp_teacher", "")).strip():
+        return {"ok": False, "error": "missing accomp teacher"}
     if not e.get("id"):
         e["id"] = "r" + format(int(time.time() * 1000), "x")
     e["at"] = time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
@@ -101,6 +103,8 @@ def act_update(body):
         return {"ok": False, "error": "missing name"}
     if not piece:
         return {"ok": False, "error": "missing piece"}
+    if str(e.get("has_accomp")) == "yes" and not str(e.get("accomp_teacher", "")).strip():
+        return {"ok": False, "error": "missing accomp teacher"}
 
     e["id"] = old["id"]
     e["at"] = old.get("at") or time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime())
